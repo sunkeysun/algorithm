@@ -44,7 +44,7 @@ class MyPromise {
             }
 
             if (callbackResult instanceof MyPromise) {
-                callbackResult.then((value) => resolve(value), (reason) => reject(reason))
+                callbackResult.then((value) => resolvePromise(promise2, value, resolve, reject), (reason) => reject(reason))
             } else {
                 resolve(callbackResult)
             }
@@ -101,5 +101,3 @@ class MyPromise {
         return new MyPromise((resolve, reject) => reject(reason))
     }
 }
-
-MyPromise.resolve(1).then((x) => console.log(x))
