@@ -37,25 +37,24 @@ class Promise {
             realOnRejected = (reason) => { throw reason }
         }
 
-        function resolvePromise(promise2, callbackResult, resolve, reject) {
-            if (promise2 === callbackResult) {
+        function resolvePromise(promiseThen, callbackResult, resolve, reject) {
+            if (promiseThen === callbackResult) {
                 throw new TypeError('circle promise')
             }
 
-            if (callbackResult instanceof MyPromise) {
+            if (callbackResult instanceof Promise) {
                 callbackResult.then((value) => resolvePromise(promise2, value, resolve, reject), (reason) => reject(reason))
             } else {
                 resolve(callbackResult)
             }
         }
 
-        const promise2 = new MyPromise((resolve, reject) => {
-            const that = this
+        const promiseThen = new Promise((resolve, reject) => {
             function resolveCallback() {
                 setTimeout(() => {
                     try {
                         const callbackResult = realOnFulfilled(that.value)
-                        resolvePromise(promise2, callbackResult, resolve, reject)
+                        resolvePromise(promiseThen, callbackResult, resolve, reject)
                     } catch (err) {
                         reject(err)
                     }
@@ -66,7 +65,7 @@ class Promise {
                 setTimeout(() => {
                     try {
                         const callbackResult = realOnRejected(that.reason)
-                        resolvePromise(promise2, callbackResult, resolve, reject)
+                        resolvePromise(promiseThen, callbackResult, resolve, reject)
                     } catch (err) {
                         reject(err)
                     }
@@ -85,7 +84,7 @@ class Promise {
             }
         })
 
-        return promise2
+        return promiseThen 
     }
 
     catch(onRejected) {
