@@ -1,8 +1,7 @@
 /**
  * Promise
  */
-
-class MyPromise {
+class Promise {
     state = 'pending'
     value = undefined
     reason = undefined
@@ -94,10 +93,10 @@ class MyPromise {
     }
 
     static resolve(value) {
-        return new MyPromise((resolve) => resolve(value))
+        return new Promise((resolve) => resolve(value))
     }
 
     static reject(reason) {
-        return new MyPromise((resolve, reject) => reject(reason))
+        return new Promise((resolve, reject) => reject(reason))
     }
 }
