@@ -1,101 +1,62 @@
 /**
- * Promise
+ * 手写Promise
  */
-class Promise {
+class MyPromise {
     state = 'pending'
-    value = undefined
-    reason = undefined
-    chainCallbacks = []
+    result = undefined
 
     constructor(executor) {
         const resolve = (value) => {
             if (this.state === 'pending') {
                 this.state = 'fulfilled'
-                this.value = value
-                this.chainCallbacks.forEach(([onFulfilled]) => onFulfilled())
+                this.result = value
             }
         }
-    
         const reject = (reason) => {
             if (this.state === 'pending') {
                 this.state = 'rejected'
-                this.reason = reason
-                this.chainCallbacks.forEach(([,onRejected]) => onRejected())
+                this.result = reason
             }
         }
 
-        executor(resolve, reject)
+        try {
+            executor(resolve, reject)
+        } catch (err) {
+            reject(err)
+        }
     }
 
     then(onFulfilled, onRejected) {
-        let realOnFulfilled = onFulfilled
-        let realOnRejected = onRejected
-        if (typeof onFulfilled !== 'function') {
-            realOnFulfilled = (value) => value
-        }
-        if (typeof onRejected !== 'function') {
-            realOnRejected = (reason) => { throw reason }
-        }
+        const onFulfilledFn = typeof onFulfilled === 'function' ? onFulfilled : result => result
+        const onRejectedFn = typeof onRejected === 'function' ? onRejected : result => result
 
-        function resolvePromise(promiseThen, callbackResult, resolve, reject) {
-            if (promiseThen === callbackResult) {
-                throw new TypeError('circle promise')
-            }
-
-            if (callbackResult instanceof Promise) {
-                callbackResult.then((value) => resolvePromise(promise2, value, resolve, reject), (reason) => reject(reason))
-            } else {
-                resolve(callbackResult)
-            }
+        if (this.state === 'fulfilled') {
+            setTimeout(() => {
+                onFulfilledFn(this.result)
+            })
         }
 
-        const promiseThen = new Promise((resolve, reject) => {
-            function resolveCallback() {
-                setTimeout(() => {
-                    try {
-                        const callbackResult = realOnFulfilled(that.value)
-                        resolvePromise(promiseThen, callbackResult, resolve, reject)
-                    } catch (err) {
-                        reject(err)
-                    }
-                })
-            }
-    
-            function rejectCallback() {
-                setTimeout(() => {
-                    try {
-                        const callbackResult = realOnRejected(that.reason)
-                        resolvePromise(promiseThen, callbackResult, resolve, reject)
-                    } catch (err) {
-                        reject(err)
-                    }
-                })
-            }
-
-            if (this.state === 'pending') {
-                this.chainCallbacks.push([
-                    resolveCallback,
-                    rejectCallback,
-                ])
-            } else if (this.state === 'fulfilled') {
-                resolveCallback()
-            } else if (this.state === 'rejected') {
-                rejectCallback()
-            }
-        })
-
-        return promiseThen 
-    }
-
-    catch(onRejected) {
-        this.then('', onRejected)
-    }
-
-    static resolve(value) {
-        return new Promise((resolve) => resolve(value))
-    }
-
-    static reject(reason) {
-        return new Promise((resolve, reject) => reject(reason))
+        if (this.state === 'rejected') {
+            setTimeout(() => {
+                onRejectedFn(this.result)
+            })
+        }
     }
 }
+
+function test(Promise) {
+    console.log(1)
+    new Promise((resolve, reject) => {
+        console.log(2)
+        resolve('result')
+        console.log(3)
+    }).then((v) => console.log(v))
+    console.log(4)
+}
+
+// console.log('Promise ------------------------------')
+// test(Promise)
+
+console.log('\r\nMyPomise ------------------------------')
+test(MyPromise)
+
